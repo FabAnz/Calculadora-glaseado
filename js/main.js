@@ -8,11 +8,11 @@ window.onload = function () {
     const result = document.getElementById('result');
     const pincel = document.querySelector("#rgPincel");
 
+
     let drawing = false;
     let lastX = 0, lastY = 0;
     let colorsUsed = {};
     let totalDrawingPixels = 0;
-    let color = colorPicker.value;
 
     /* Variables de historial de trazos */
     let trazo = 0
@@ -22,12 +22,20 @@ window.onload = function () {
     canvas.width = 800;
     canvas.height = 600;
 
+
+    //Color picker
+    let color = colorPicker.value;
+    colorPicker.addEventListener("input", function () {
+        color = colorPicker.value
+    })
+
+
     // Controlar el grosor del pincel
     let grosorLinea = pincel.value;
-
     pincel.addEventListener("input", function () {
         grosorLinea = pincel.value;
     });
+
 
     /* Guardar los trazos nuevos */
     const saveState = () => {
@@ -43,6 +51,16 @@ window.onload = function () {
     const undo = () => {
         if (historyIndex >= 0) {
             ctx.putImageData(sistema.history[historyIndex].dato, 0, 0);
+
+            colorsUsed[sistema.history[historyIndex].color] = colorsUsed[sistema.history[historyIndex].color] - sistema.history[historyIndex].trazo;
+
+            if (colorsUsed[sistema.history[historyIndex].color] == 0) delete colorsUsed[sistema.history[historyIndex].color]
+            sistema.history.pop()
+            
+            console.log("Inicio")
+            console.log(colorsUsed)
+            console.log(sistema.history)
+
             historyIndex--;
         }
     };
@@ -78,7 +96,6 @@ window.onload = function () {
         // Guardar el estado al iniciar un trazo
         if (isNaN(colorsUsed[color])) colorsUsed[color] = 0
         trazo = colorsUsed[color]
-        console.log("Trazo 0 " + trazo);
 
         saveState();
         draw(e); // Comienza a dibujar inmediatamente en el evento mousedown/touchstart
@@ -124,10 +141,12 @@ window.onload = function () {
             // Guardar el estado al terminar un trazo
             drawing = false;
             trazo = colorsUsed[color] - trazo;
-            let nuevoTrazo = new Trazo(image, trazo)
+            let nuevoTrazo = new Trazo(image, trazo, color)
             sistema.history.push(nuevoTrazo)
 
+            console.log("Final")
             console.log(sistema.history)
+            console.log("Final")
             console.log(colorsUsed)
 
             trazo = 0
@@ -151,6 +170,12 @@ window.onload = function () {
     clearButton.addEventListener('click', () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         colorsUsed = {};
+        sistema.history = []
+
+        console.log("Inicio")
+        console.log(colorsUsed)
+        console.log(sistema.history)
+
         totalDrawingPixels = 0;
         pixelsState = Array.from({ length: canvas.width }, () => Array(canvas.height).fill(null)); // Reiniciar estado de los píxeles
         result.textContent = '';
