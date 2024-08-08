@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
     margin: 0;
     padding: 0;
     display: flex;
@@ -18,4 +19,10 @@ canvas {
     margin: 10px auto;
     background-image: url('path-to-your-image.jpg');
     background-size: cover;
+}
+
+.muestraColor {
+    width: 50px;
+    height: 25px;
+    display: inline-block;
 }

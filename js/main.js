@@ -155,6 +155,7 @@ function stopDrawing() {
         let nuevoTrazo = new Trazo(image, trazo, color)
         sistema.history.push(nuevoTrazo)
         trazo = 0
+        calcularPorcentajes()
     }
 }
 
@@ -165,16 +166,37 @@ function borrarTodo() {
     sistema.history = []
     historyIndex = -1
 
-    console.log("Inicio")
-    console.log(colorsUsed)
-    console.log(sistema.history)
-
     totalDrawingPixels = 0;
     pixelsState = Array.from({ length: canvas.width }, () => Array(canvas.height).fill(null)); // Reiniciar estado de los píxeles
     result.textContent = '';
 }
 
+//Calcular porcentajes
+function calcularPorcentajes() {
+    let totalPixeles = 0
+    let porcentaje = 0
+    let id = ""
+    let colores = ""
 
+    result.innerHTML = ""
+
+    for (let trazo of Object.values(colorsUsed)) {
+        totalPixeles += trazo
+    }
+
+    for (let unColor in colorsUsed) {
+        porcentaje = colorsUsed[unColor] / totalPixeles * 100
+        id = unColor.slice(1)
+        colores += `<div id="muestraColor${id}" class="muestraColor"></div> ${porcentaje.toFixed(0)}% `
+    }
+    result.innerHTML = colores
+
+    //Cambiar colores
+    for (let unColor in colorsUsed) {
+        id = unColor.slice(1)
+        document.querySelector(`#muestraColor${id}`).style.backgroundColor = unColor
+    }
+}
 
 
 
