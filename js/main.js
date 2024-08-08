@@ -63,6 +63,9 @@ function saveState() {
     historyIndex++;
 }
 
+// Agregar evento al botón de deshacer
+document.getElementById('btnDeshacer').addEventListener('click', undo);
+
 /* Deshacer trazo */
 function undo() {
     if (historyIndex >= 0) {
@@ -74,11 +77,9 @@ function undo() {
         sistema.history.pop()
 
         historyIndex--;
+        calcularPorcentajes()
     }
 }
-
-// Agregar evento al botón de deshacer
-document.getElementById('btnDeshacer').addEventListener('click', undo);
 
 // Inicializar estado de los píxeles con el color actual
 let pixelsState = Array.from({ length: canvas.width }, () => Array(canvas.height).fill(null));
@@ -156,6 +157,7 @@ function stopDrawing() {
         sistema.history.push(nuevoTrazo)
         trazo = 0
         calcularPorcentajes()
+        console.log(colorsUsed)
     }
 }
 
@@ -197,31 +199,3 @@ function calcularPorcentajes() {
         document.querySelector(`#muestraColor${id}`).style.backgroundColor = unColor
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-showPercentagesButton.addEventListener('click', displayResults);
-
-
-
-function displayResults() {
-    const percentages = calculatePercentages();
-
-    let resultado = "<h2>Color Usage Percentages:</h2>"
-
-    for (let color in percentages) {
-        resultado += `<p>${color}: ${percentages[color]}%</p>`;
-    }
-    result.innerHTML = resultado
-}
-
