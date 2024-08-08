@@ -78,6 +78,7 @@ function undo() {
 
         historyIndex--;
         calcularPorcentajes()
+        console.log(colorsUsed)
     }
 }
 
@@ -136,7 +137,18 @@ function draw(e) {
             const currentY = Math.floor(lastY + offsetY);
 
             if (currentX >= 0 && currentX < canvas.width && currentY >= 0 && currentY < canvas.height) {
-                if (pixelsState[currentX][currentY] !== color) {
+                const previousColor = pixelsState[currentX][currentY];
+                
+                if (previousColor !== color) {
+                    // Si hay un color debajo, resta su conteo
+                    if (previousColor !== null) {
+                        colorsUsed[previousColor]--;
+                        if (colorsUsed[previousColor] === 0) {
+                            delete colorsUsed[previousColor];
+                        }
+                    }
+
+                    // Actualiza el nuevo color
                     pixelsState[currentX][currentY] = color;
                     totalDrawingPixels++;
                     colorsUsed[color] = (colorsUsed[color] || 0) + 1;
@@ -147,6 +159,7 @@ function draw(e) {
 
     [lastX, lastY] = [x, y];
 }
+
 
 //Termina el trazo
 function stopDrawing() {
