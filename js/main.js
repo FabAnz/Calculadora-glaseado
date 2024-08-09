@@ -28,7 +28,7 @@ clearButton.addEventListener("click", borrarTodo)
 let drawing = false;
 let lastX = 0, lastY = 0;
 let colorsUsed = {};
-let colorPrevio = "";
+let cambioColor = null;
 let valorColorPrevio = 0;
 let totalDrawingPixels = 0;
 
@@ -119,6 +119,7 @@ function startDrawing(e) {
 
 function draw(e) {
     if (!drawing) return;
+
     const { x, y } = getPointerPosition(e);
 
     ctx.lineWidth = grosorLinea;
@@ -130,6 +131,9 @@ function draw(e) {
     ctx.lineTo(x, y);
     ctx.stroke();
 
+    let previousColor = null
+    let cambio = false
+
     // Marcar los píxeles en el área de la línea como pintados
     const halfLineWidth = Math.floor(grosorLinea / 2);
 
@@ -139,14 +143,18 @@ function draw(e) {
             const currentY = Math.floor(lastY + offsetY);
 
             if (currentX >= 0 && currentX < canvas.width && currentY >= 0 && currentY < canvas.height) {
-                let previousColor = pixelsState[currentX][currentY];
+
+
+                previousColor = pixelsState[currentX][currentY];
 
                 if (previousColor !== color) {
                     // Si hay un color debajo, resta su conteo
                     if (previousColor !== null) {
                         colorsUsed[previousColor]--;
                         valorColorPrevio++;
-                        colorPrevio = previousColor
+
+                        cambio = true
+
                         if (colorsUsed[previousColor] === 0) {
                             delete colorsUsed[previousColor];
                         }
@@ -157,10 +165,22 @@ function draw(e) {
                     totalDrawingPixels++;
                     colorsUsed[color] = (colorsUsed[color] || 0) + 1;
                 }
+
+
             }
         }
     }
 
+    //Si se borro un trazo previo este se guarda
+    // console.log(previousColor, cambioColor)
+    if (previousColor != cambioColor && cambioColor != null && cambio) {
+        let trazoBorrado = new TrazoBorrado(valorColorPrevio, previousColor, sistema.history[sistema.history.length - 1].id)
+
+        sistema.trazosBorrados.push(trazoBorrado)
+        valorColorPrevio = 0
+        cambio = false
+    }
+    cambioColor = previousColor;
     [lastX, lastY] = [x, y];
 }
 
@@ -172,17 +192,15 @@ function stopDrawing() {
         trazo = colorsUsed[color] - trazo;
         let nuevoTrazo = new Trazo(image, trazo, color)
         sistema.history.push(nuevoTrazo)
-        //Si se borro un trazo previo este se guarda
-        if (valorColorPrevio > 0) {
-            let trazoBorrado = new TrazoBorrado(valorColorPrevio, colorPrevio, sistema.history[sistema.history.length - 1].id)
 
-            sistema.trazosBorrados.push(trazoBorrado)
-        }
+            
 
         trazo = 0
-        valorColorPrevio = 0
         calcularPorcentajes()
-        console.log(sistema.trazosBorrados)
+        //console.log(sistema.trazosBorrados)
+        console.log(colorsUsed)
+        console.log(sistema.history)
+
     }
 }
 
