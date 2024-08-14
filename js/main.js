@@ -69,6 +69,9 @@ function undo() {
 
         historyIndex--;
         calcularPorcentajes()
+        contarPixelesPorColor()
+
+        sistema.borrarSeleccionados()
     }
 }
 
@@ -98,6 +101,11 @@ function startDrawing(e) {
     [lastX, lastY] = [x, y];
 
     saveState();
+
+    if (!sistema.colorExiste(color)) sistema.coloresSeleccionados.push(color)
+
+   
+
     draw(e); // Comienza a dibujar inmediatamente en el evento mousedown/touchstart
 }
 
@@ -123,15 +131,55 @@ function stopDrawing() {
     if (drawing) {
         drawing = false;
 
-        calcularPorcentajes()
+        contarPixelesPorColor()
 
     }
 }
 
+//Contar los pixeles para sacar porcentajes de uso
+function contarPixelesPorColor() {
+    // Obtener la información de los píxeles del canvas
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    sistema.coloresContados = {}
+    // Recorrer todos los píxeles del canvas
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];       // Componente Rojo
+        const g = data[i + 1];   // Componente Verde
+        const b = data[i + 2];   // Componente Azul
+
+        // Convertir los componentes RGB a formato hexadecimal
+        const hexColor = rgbToHex(r, g, b);
+
+        if (sistema.colorExiste(hexColor)) {
+            // Incrementar la cuenta para el color encontrado
+            if (sistema.coloresContados[hexColor]) {
+                sistema.coloresContados[hexColor]++;
+            } else {
+                sistema.coloresContados[hexColor] = 1;
+            }
+        }
+    }
+}
+
+// Función auxiliar para convertir RGB a hexadecimal
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+// Convertir un componente (R, G o B) a formato hexadecimal
+function componentToHex(c) {
+    const hex = c.toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+}
+
+
 // Limpiar el canvas
 function borrarTodo() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    sistema.pixelesPorColor = {};
+    sistema.coloresContados = {}
+    sistema.coloresSeleccionados=[]
     sistema.historialTrazos = []
     historyIndex = -1
 
@@ -152,14 +200,14 @@ function calcularPorcentajes() {
     /* for (let trazo of Object.values(colorsUsed)) {
         totalPixeles += trazo
     }
-
+ 
     for (let unColor in colorsUsed) {
         porcentaje = colorsUsed[unColor] / totalPixeles * 100
         id = unColor.slice(1)
         colores += `<div id="muestraColor${id}" class="muestraColor"></div> ${porcentaje.toFixed(0)}% `
     }
     result.innerHTML = colores
-
+ 
     //Cambiar colores
     for (let unColor in colorsUsed) {
         id = unColor.slice(1)
