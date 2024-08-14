@@ -72,6 +72,7 @@ function undo() {
         contarPixelesPorColor()
 
         sistema.borrarSeleccionados()
+        calcularPorcentajes()
     }
 }
 
@@ -104,8 +105,6 @@ function startDrawing(e) {
 
     if (!sistema.colorExiste(color)) sistema.coloresSeleccionados.push(color)
 
-   
-
     draw(e); // Comienza a dibujar inmediatamente en el evento mousedown/touchstart
 }
 
@@ -132,7 +131,7 @@ function stopDrawing() {
         drawing = false;
 
         contarPixelesPorColor()
-
+        calcularPorcentajes()
     }
 }
 
@@ -179,13 +178,14 @@ function componentToHex(c) {
 function borrarTodo() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     sistema.coloresContados = {}
-    sistema.coloresSeleccionados=[]
+    sistema.coloresSeleccionados = []
     sistema.historialTrazos = []
     historyIndex = -1
 
 
     pixelsState = Array.from({ length: canvas.width }, () => Array(canvas.height).fill(null)); // Reiniciar estado de los píxeles
     result.textContent = '';
+    calcularPorcentajes()
 }
 
 //Calcular porcentajes
@@ -197,20 +197,21 @@ function calcularPorcentajes() {
 
     result.innerHTML = ""
 
-    /* for (let trazo of Object.values(colorsUsed)) {
-        totalPixeles += trazo
+    //Contar todos los pixeles
+    for (let pixel of Object.values(sistema.coloresContados)) {
+        totalPixeles += pixel
     }
- 
-    for (let unColor in colorsUsed) {
-        porcentaje = colorsUsed[unColor] / totalPixeles * 100
+
+    for (let unColor in sistema.coloresContados) {
+        porcentaje = sistema.coloresContados[unColor] / totalPixeles * 100
         id = unColor.slice(1)
         colores += `<div id="muestraColor${id}" class="muestraColor"></div> ${porcentaje.toFixed(0)}% `
     }
     result.innerHTML = colores
- 
+
     //Cambiar colores
-    for (let unColor in colorsUsed) {
+    for (let unColor in sistema.coloresContados) {
         id = unColor.slice(1)
         document.querySelector(`#muestraColor${id}`).style.backgroundColor = unColor
-    } */
+    }
 }
