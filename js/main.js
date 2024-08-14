@@ -1,5 +1,3 @@
-// script.js
-
 //Constantes
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
@@ -27,12 +25,8 @@ clearButton.addEventListener("click", borrarTodo)
 
 let drawing = false;
 let lastX = 0, lastY = 0;
-let colorsUsed = {};
-let totalDrawingPixels = 0;
 
 /* Variables de historial de trazos */
-let trazo = 0
-let image = null
 let historyIndex = -1;
 
 canvas.width = 500;
@@ -53,13 +47,13 @@ pincel.addEventListener("input", function () {
 });
 
 
-/* Guardar los trazos nuevos */
+/* Guardar el estado del canva cuando se va a realizar un nuevo trazo */
 function saveState() {
-    if (historyIndex < sistema.history.length - 1) {
+    if (historyIndex < sistema.historialTrazos.length - 1) {
         // Si estamos en el medio del historial, descarta los estados posteriores
-        sistema.history = sistema.history.slice(0, historyIndex + 1);
+        sistema.historialTrazos = sistema.historialTrazos.slice(0, historyIndex + 1);
     }
-    image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    sistema.historialTrazos.push(ctx.getImageData(0, 0, canvas.width, canvas.height))
     historyIndex++;
 }
 
@@ -69,16 +63,12 @@ document.getElementById('btnDeshacer').addEventListener('click', undo);
 /* Deshacer trazo */
 function undo() {
     if (historyIndex >= 0) {
-        ctx.putImageData(sistema.history[historyIndex].dato, 0, 0);
 
-        colorsUsed[sistema.history[historyIndex].color] = colorsUsed[sistema.history[historyIndex].color] - sistema.history[historyIndex].trazo;
-
-        if (colorsUsed[sistema.history[historyIndex].color] == 0) delete colorsUsed[sistema.history[historyIndex].color]
-        sistema.history.pop()
+        ctx.putImageData(sistema.historialTrazos[historyIndex], 0, 0);
+        sistema.historialTrazos.pop()
 
         historyIndex--;
         calcularPorcentajes()
-        console.log(colorsUsed)
     }
 }
 
@@ -107,10 +97,6 @@ function startDrawing(e) {
     const { x, y } = getPointerPosition(e);
     [lastX, lastY] = [x, y];
 
-    // Guardar el estado al iniciar un trazo
-    if (isNaN(colorsUsed[color])) colorsUsed[color] = 0
-    trazo = colorsUsed[color]
-
     saveState();
     draw(e); // Comienza a dibujar inmediatamente en el evento mousedown/touchstart
 }
@@ -129,75 +115,15 @@ function draw(e) {
     ctx.lineTo(x, y);
     ctx.stroke();
 
-    let valorColorPrevio = 0;
-    let colorAnteriorDetectado = null;
-    let cambio = false;
-
-    // Marcar los píxeles en el área de la línea como pintados
-    const halfLineWidth = Math.floor(grosorLinea / 2);
-
-    for (let offsetX = -halfLineWidth; offsetX <= halfLineWidth; offsetX++) {
-        for (let offsetY = -halfLineWidth; offsetY <= halfLineWidth; offsetY++) {
-            const currentX = Math.floor(lastX + offsetX);
-            const currentY = Math.floor(lastY + offsetY);
-
-            if (currentX >= 0 && currentX < canvas.width && currentY >= 0 && currentY < canvas.height) {
-                let previousColor = pixelsState[currentX][currentY];
-
-                if (previousColor !== color) {
-                    // Si hay un color debajo, resta su conteo
-                    if (previousColor !== null) {
-                        colorsUsed[previousColor]--;
-                        valorColorPrevio++;
-                        cambio = true;
-
-                        // Guarda el color anterior detectado para usarlo en TrazoBorrado
-                        if (!colorAnteriorDetectado) {
-                            colorAnteriorDetectado = previousColor;
-                        }
-
-                        if (colorsUsed[previousColor] === 0) {
-                            delete colorsUsed[previousColor];
-                        }
-                    }
-
-                    // Actualiza el nuevo color
-                    pixelsState[currentX][currentY] = color;
-                    colorsUsed[color] = (colorsUsed[color] || 0) + 1;
-                }
-            }
-        }
-    }
-
-    // Si se borró un trazo previo, este se guarda
-    if (cambio && colorAnteriorDetectado !== null) {
-        let idTrazo = sistema.history.length;
-        let borrado = new TrazoBorrado(valorColorPrevio, colorAnteriorDetectado, idTrazo);
-        sistema.trazosBorrados.push(borrado);
-
-        valorColorPrevio = 0;
-    }
-
     [lastX, lastY] = [x, y];
 }
-
-
 
 //Termina el trazo
 function stopDrawing() {
     if (drawing) {
         drawing = false;
-        trazo = colorsUsed[color] - trazo;
-        let nuevoTrazo = new Trazo(image, trazo, color)
-        sistema.history.push(nuevoTrazo)
 
-
-
-        trazo = 0
         calcularPorcentajes()
-        //console.log(sistema.history)
-        console.log(colorsUsed)
-        console.log(sistema.trazosBorrados)
 
     }
 }
@@ -205,11 +131,11 @@ function stopDrawing() {
 // Limpiar el canvas
 function borrarTodo() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    colorsUsed = {};
-    sistema.history = []
+    sistema.pixelesPorColor = {};
+    sistema.historialTrazos = []
     historyIndex = -1
 
-    totalDrawingPixels = 0;
+
     pixelsState = Array.from({ length: canvas.width }, () => Array(canvas.height).fill(null)); // Reiniciar estado de los píxeles
     result.textContent = '';
 }
@@ -223,7 +149,7 @@ function calcularPorcentajes() {
 
     result.innerHTML = ""
 
-    for (let trazo of Object.values(colorsUsed)) {
+    /* for (let trazo of Object.values(colorsUsed)) {
         totalPixeles += trazo
     }
 
@@ -238,5 +164,5 @@ function calcularPorcentajes() {
     for (let unColor in colorsUsed) {
         id = unColor.slice(1)
         document.querySelector(`#muestraColor${id}`).style.backgroundColor = unColor
-    }
+    } */
 }
