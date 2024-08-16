@@ -68,7 +68,6 @@ function undo() {
         sistema.historialTrazos.pop()
 
         historyIndex--;
-        calcularPorcentajes()
         contarPixelesPorColor()
 
         sistema.borrarSeleccionados()
@@ -196,7 +195,7 @@ function calcularPorcentajes() {
     let colores = ""
 
     result.innerHTML = ""
-
+    console.log(sistema.coloresContados)
     //Contar todos los pixeles
     for (let pixel of Object.values(sistema.coloresContados)) {
         totalPixeles += pixel
