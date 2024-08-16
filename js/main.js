@@ -37,6 +37,7 @@ canvas.height = 600;
 let color = colorPicker.value;
 colorPicker.addEventListener("input", function () {
     color = colorPicker.value
+    if (color == "#000000") color = "#000001"
 })
 
 
@@ -101,7 +102,6 @@ function startDrawing(e) {
     [lastX, lastY] = [x, y];
 
     saveState();
-
     if (!sistema.colorExiste(color)) sistema.coloresSeleccionados.push(color)
 
     draw(e); // Comienza a dibujar inmediatamente en el evento mousedown/touchstart
@@ -114,7 +114,7 @@ function draw(e) {
 
     ctx.lineWidth = grosorLinea;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = colorPicker.value;
+    ctx.strokeStyle = color;
 
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
@@ -195,7 +195,6 @@ function calcularPorcentajes() {
     let colores = ""
 
     result.innerHTML = ""
-    console.log(sistema.coloresContados)
     //Contar todos los pixeles
     for (let pixel of Object.values(sistema.coloresContados)) {
         totalPixeles += pixel
