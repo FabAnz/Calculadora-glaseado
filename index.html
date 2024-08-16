@@ -5,7 +5,8 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Calculadora de glaseado</title>
-	<meta name="description" content="Calcula cuantos gramos de glaseado precisas para cada color de tu receta, asi podras hacer la reseta exacta para que no te falte ni te sobre glaseado.">
+	<meta name="description"
+		content="Calcula cuantos gramos de glaseado precisas para cada color de tu receta, asi podras hacer la reseta exacta para que no te falte ni te sobre glaseado.">
 
 	<!-- CSS -->
 	<link rel="stylesheet" href="css/styles.css">
@@ -13,7 +14,18 @@
 
 <body>
 
+	<div class="container">
+		<h1>Draw on Image</h1>
+		<input type="range" id="rgPincel" min="1" max="100" value="30" step="5">
+		<input type="color" id="colorPicker" value="#7e6767">
+		<input type="button" id="btnDeshacer" value="Deshacer">
+		<button id="clearButton">Clear</button>
+		<canvas id="drawingCanvas"></canvas>
+		<div id="result"></div>
+	</div>
+
 	<!-- Scripts -->
+	<script src="js/clases.js"></script>
 	<script src="js/main.js"></script>
 </body>
 
